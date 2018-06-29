@@ -1,6 +1,6 @@
 package com.system1.androidapp;
 
-import android.support.annotation.NonNull;
+import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,48 +8,206 @@ import android.util.Log;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.stream.JsonReader;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private AdView myAdView;
     private AdView myAdView2;
-    private DatabaseReference mDatabase;
-    private DatabaseReference dbRef;
 
     public class Quiz {
 
+        private Questions questions;
+
+
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        private String title;
+        private String description;
+        private String type;
+        private String url;
+
+        public Quiz () {
+
+        }
+
+        public Quiz (JSONObject json) {
+            //TODO: figure out how to loop through JSONArray here.
+            this.questions = new Questions(json.optJSONObject("questions"));
+            this.title = json.optString("title");
+            this.description = json.optString("description");
+            this.type = json.optString("type");
+            this.url = json.optString("url");
+        }
+
 
     }
+
+    public class Questions implements Serializable {
+        private Options options;
+        private String answer;
+
+        public String getAnswer() {
+            return answer;
+        }
+
+        public void setAnswer(String answer) {
+            this.answer = answer;
+        }
+
+        public Integer getIndex() {
+            return index;
+        }
+
+        public void setIndex(Integer index) {
+            this.index = index;
+        }
+
+        public String getHint() {
+            return hint;
+        }
+
+        public void setHint(String hint) {
+            this.hint = hint;
+        }
+
+        public String getQuestion() {
+            return question;
+        }
+
+        public void setQuestion(String question) {
+            this.question = question;
+        }
+
+        private Integer index;
+        private String hint;
+        private String question;
+
+        public Questions() {
+
+        }
+
+        public Questions(JSONObject json) {
+            this.options = new Options(json.optJSONObject("options"));
+            this.answer = json.optString("answer");
+            this.index = json.optInt("index");
+            this.hint = json.optString("hint");
+            this.question = json.optString("question");
+        }
+    }
+
+    public class Options implements Serializable {
+        private String answer;
+        private Integer points;
+
+        public Options() {
+
+        }
+
+        public Options(JSONObject json) {
+            this.points = json.optInt("points");
+            this.answer = json.optString("answer");
+        }
+
+
+    }
+
+
+    public List<Quiz> loadJSonFromAsset() {
+        List<Quiz> quizList = new LinkedList<>();
+        String json = null;
+        try {
+            InputStream is = getAssets().open("quizzes.json");
+            JsonReader reader = new JsonReader(new InputStreamReader(is, "UTF-8"));
+
+            reader.beginArray();
+
+            Gson gson = new GsonBuilder().create();
+
+            while (reader.hasNext()) {
+                Quiz quizJson = gson.fromJson(reader, Quiz.class);
+                Quiz quiz = new Quiz();
+                quiz.setTitle(quizJson.getTitle());
+                quiz.setDescription(quizJson.getDescription());
+                quiz.setType(quizJson.getType());
+                quiz.setUrl(quizJson.getUrl());
+                quiz.setQuestions(quizJson.getQuestions);
+
+                quizList.add(quiz);
+            }
+
+            reader.close();
+        }catch(UnsupportedEncodingException ex){
+
+        }catch (IOException ex) {
+
+        }
+        return quizList;
+    }
+
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-
-        mDatabase = FirebaseDatabase.getInstance().getReference();
-        dbRef = mDatabase.child("quizes/");
-
-
-        dbRef.child("0").addListenerForSingleValueEvent(new ValueEventListener() {
-            Quiz quiz = new Quiz();
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                quiz = dataSnapshot.getValue(Quiz.class);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
-        });
-
         MobileAds.initialize(this, "ca-app-pub-3940256099942544/6300978111");
 
+        List<Quiz> quizList = new LinkedList<>();
+        Quiz quiz = new Quiz();
+
+        quizList = loadJSonFromAsset();
 
         myAdView = findViewById(R.id.myAdView);
         AdRequest adRequest = new AdRequest.Builder().build();
@@ -60,6 +218,7 @@ public class MainActivity extends AppCompatActivity {
         myAdView2.loadAd(adRequest2);
 
     }
+
 
 
 
