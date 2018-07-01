@@ -34,9 +34,20 @@ public class MainActivity extends AppCompatActivity {
 
     public class Quiz {
 
-        private Questions questions;
+        private String title;
+        private String description;
+        private String type;
+        private String url;
 
+        public ArrayList<Questions> questions;
 
+        public ArrayList<Questions> getQuestions() {
+            return questions;
+        }
+
+        public void setQuestions(ArrayList<Questions> questions) {
+            this.questions = questions;
+        }
 
         public String getTitle() {
             return title;
@@ -70,30 +81,27 @@ public class MainActivity extends AppCompatActivity {
             this.url = url;
         }
 
-        private String title;
-        private String description;
-        private String type;
-        private String url;
-
         public Quiz () {
 
         }
 
-        public Quiz (JSONObject json) {
-            //TODO: figure out how to loop through JSONArray here.
-            this.questions = new Questions(json.optJSONObject("questions"));
-            this.title = json.optString("title");
-            this.description = json.optString("description");
-            this.type = json.optString("type");
-            this.url = json.optString("url");
-        }
-
-
     }
 
     public class Questions implements Serializable {
-        private Options options;
+
+        private Integer index;
+        private String hint;
+        private String question;
         private String answer;
+        public ArrayList<Options> options;
+
+        public ArrayList<Options> getOptions() {
+            return options;
+        }
+
+        public void setOptions(ArrayList<Options> options) {
+            this.options = options;
+        }
 
         public String getAnswer() {
             return answer;
@@ -127,43 +135,45 @@ public class MainActivity extends AppCompatActivity {
             this.question = question;
         }
 
-        private Integer index;
-        private String hint;
-        private String question;
-
         public Questions() {
 
         }
 
-        public Questions(JSONObject json) {
-            this.options = new Options(json.optJSONObject("options"));
-            this.answer = json.optString("answer");
-            this.index = json.optInt("index");
-            this.hint = json.optString("hint");
-            this.question = json.optString("question");
-        }
     }
 
     public class Options implements Serializable {
+
         private String answer;
         private Integer points;
+
+        public String getAnswer() {
+            return answer;
+        }
+
+        public void setAnswer(String answer) {
+            this.answer = answer;
+        }
+
+        public Integer getPoints() {
+            return points;
+        }
+
+        public void setPoints(Integer points) {
+            this.points = points;
+        }
+
+
 
         public Options() {
 
         }
-
-        public Options(JSONObject json) {
-            this.points = json.optInt("points");
-            this.answer = json.optString("answer");
-        }
-
 
     }
 
 
     public List<Quiz> loadJSonFromAsset() {
         List<Quiz> quizList = new LinkedList<>();
-        String json = null;
+
         try {
             InputStream is = getAssets().open("quizzes.json");
             JsonReader reader = new JsonReader(new InputStreamReader(is, "UTF-8"));
@@ -179,8 +189,7 @@ public class MainActivity extends AppCompatActivity {
                 quiz.setDescription(quizJson.getDescription());
                 quiz.setType(quizJson.getType());
                 quiz.setUrl(quizJson.getUrl());
-                quiz.setQuestions(quizJson.getQuestions);
-
+                quiz.setQuestions(quizJson.getQuestions());
                 quizList.add(quiz);
             }
 
@@ -205,7 +214,6 @@ public class MainActivity extends AppCompatActivity {
         MobileAds.initialize(this, "ca-app-pub-3940256099942544/6300978111");
 
         List<Quiz> quizList = new LinkedList<>();
-        Quiz quiz = new Quiz();
 
         quizList = loadJSonFromAsset();
 
