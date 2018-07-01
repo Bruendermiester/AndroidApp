@@ -24,7 +24,8 @@
             "points" : 1
           } ],
         "question" : "What are the two main components of the engine cooling system in most cars?"
-      }, {
+      },
+      {
         "answer" : "Oil lubricates the pistons so they can move smoothly inside the engine, and without oil, the engine will seize.",
         "hasMediaOptions" : false,
         "hideQuestion" : true,

@@ -1,9 +1,15 @@
 package com.system1.androidapp;
 
-import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -11,12 +17,6 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONArray;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,6 +31,8 @@ public class MainActivity extends AppCompatActivity {
 
     private AdView myAdView;
     private AdView myAdView2;
+
+    public static Integer questionNumber = 0;
 
     public class Quiz {
 
@@ -81,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
             this.url = url;
         }
 
-        public Quiz () {
+        public Quiz() {
 
         }
 
@@ -162,14 +164,11 @@ public class MainActivity extends AppCompatActivity {
             this.points = points;
         }
 
-
-
         public Options() {
 
         }
 
     }
-
 
     public List<Quiz> loadJSonFromAsset() {
         List<Quiz> quizList = new LinkedList<>();
@@ -194,9 +193,9 @@ public class MainActivity extends AppCompatActivity {
             }
 
             reader.close();
-        }catch(UnsupportedEncodingException ex){
+        } catch (UnsupportedEncodingException ex) {
 
-        }catch (IOException ex) {
+        } catch (IOException ex) {
 
         }
         return quizList;
@@ -217,17 +216,116 @@ public class MainActivity extends AppCompatActivity {
 
         quizList = loadJSonFromAsset();
 
-        myAdView = findViewById(R.id.myAdView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        myAdView.loadAd(adRequest);
+        LinearLayout linearLayout = new LinearLayout(this);
+        setContentView(linearLayout);
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
 
-        myAdView2 = findViewById(R.id.myAdView2);
-        AdRequest adRequest2 = new AdRequest.Builder().build();
-        myAdView2.loadAd(adRequest2);
+        TextView textQuestion = new TextView(this);
+        textQuestion.setText(quizList.get(0).questions.get(questionNumber).question);
+        textQuestion.setWidth(250);
+        textQuestion.setHeight(150);
+        textQuestion.setGravity(Gravity.CENTER);
+        linearLayout.addView(textQuestion);
+
+        for( int i = 0; i < quizList.get(0).questions.get(questionNumber).options.size(); i++ )
+        {
+            TextView textView = new TextView(this);
+            textView.setText(quizList.get(0).questions.get(questionNumber).options.get(i).answer);
+            textView.setWidth(250);
+            textView.setHeight(150);
+            textView.setGravity(Gravity.CENTER);
+
+            textView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    questionNumber = questionNumber + 1;
+                    Log.i("questionNumber",  questionNumber.toString());
+                    reCreate(view);
+                }
+            });
+
+            linearLayout.addView(textView);
+        }
+
+
+
+//        myAdView = findViewById(R.id.myAdView);
+//        AdRequest adRequest = new AdRequest.Builder().build();
+//        myAdView.loadAd(adRequest);
+//
+//        myAdView2 = findViewById(R.id.myAdView2);
+//        AdRequest adRequest2 = new AdRequest.Builder().build();
+//        myAdView2.loadAd(adRequest2);
 
     }
 
+    public void reCreate(View view) {
+
+        ViewGroup r = (ViewGroup) view.getParent().getParent();
+        r.removeAllViews();
+
+        List<Quiz> quizList = new LinkedList<>();
+
+        quizList = loadJSonFromAsset();
+
+        LinearLayout linearLayout = new LinearLayout(this);
+        setContentView(linearLayout);
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+
+        TextView textQuestion = new TextView(this);
+
+        if( questionNumber.equals(quizList.get(0).questions.size())) {
+            TextView textView = new TextView(this);
+            textView.setText("Congradulations you wasted your time");
+            textView.setWidth(250);
+            textView.setHeight(350);
+            textView.setGravity(Gravity.CENTER);
+            linearLayout.addView(textView);
+            
+            Button button = new Button(this);
+
+            button.setText("Start over??");
+            button.setWidth(75);
+            button.setHeight(40);
+            button.setGravity(Gravity.CENTER);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    questionNumber = 0;
+                    reCreate(view);
+                }
+            });
+            linearLayout.addView(button);
 
 
 
+        }
+        else {
+            textQuestion.setText(quizList.get(0).questions.get(questionNumber).question);
+            textQuestion.setWidth(250);
+            textQuestion.setHeight(150);
+            textQuestion.setGravity(Gravity.CENTER);
+            linearLayout.addView(textQuestion);
+
+            for (int i = 0; i < quizList.get(0).questions.get(questionNumber).options.size(); i++) {
+                TextView textView = new TextView(this);
+                textView.setText(quizList.get(0).questions.get(questionNumber).options.get(i).answer);
+                textView.setWidth(250);
+                textView.setHeight(150);
+                textView.setGravity(Gravity.CENTER);
+
+                textView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        questionNumber = questionNumber + 1;
+                        Log.i("questionNumber", questionNumber.toString());
+                        reCreate(view);
+                    }
+                });
+
+                linearLayout.addView(textView);
+            }
+
+        }
+    }
 }
