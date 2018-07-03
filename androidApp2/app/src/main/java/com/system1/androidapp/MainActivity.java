@@ -32,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
     private AdView myAdView;
     private AdView myAdView2;
 
+    List<Quiz> quizList = new LinkedList<>();
+
     public static Integer questionNumber = 0;
 
     public class Quiz {
@@ -203,19 +205,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        MobileAds.initialize(this, "ca-app-pub-3940256099942544/6300978111");
-
-        List<Quiz> quizList = new LinkedList<>();
-
-        quizList = loadJSonFromAsset();
-
+    public void quizSetup() {
         LinearLayout linearLayout = new LinearLayout(this);
         setContentView(linearLayout);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
@@ -246,8 +236,19 @@ public class MainActivity extends AppCompatActivity {
 
             linearLayout.addView(textView);
         }
+    }
 
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        MobileAds.initialize(this, "ca-app-pub-3940256099942544/6300978111");
+
+        quizList = loadJSonFromAsset();
+
+        quizSetup();
 
 //        myAdView = findViewById(R.id.myAdView);
 //        AdRequest adRequest = new AdRequest.Builder().build();
@@ -264,24 +265,24 @@ public class MainActivity extends AppCompatActivity {
         ViewGroup r = (ViewGroup) view.getParent().getParent();
         r.removeAllViews();
 
-        List<Quiz> quizList = new LinkedList<>();
 
-        quizList = loadJSonFromAsset();
-
-        LinearLayout linearLayout = new LinearLayout(this);
-        setContentView(linearLayout);
-        linearLayout.setOrientation(LinearLayout.VERTICAL);
-
-        TextView textQuestion = new TextView(this);
 
         if( questionNumber.equals(quizList.get(0).questions.size())) {
+
+            LinearLayout linearLayout = new LinearLayout(this);
+            setContentView(linearLayout);
+            linearLayout.setOrientation(LinearLayout.VERTICAL);
+
+            TextView textQuestion = new TextView(this);
+
             TextView textView = new TextView(this);
             textView.setText("Congradulations you wasted your time");
             textView.setWidth(250);
             textView.setHeight(350);
             textView.setGravity(Gravity.CENTER);
             linearLayout.addView(textView);
-            
+
+
             Button button = new Button(this);
 
             button.setText("Start over??");
@@ -297,35 +298,9 @@ public class MainActivity extends AppCompatActivity {
             });
             linearLayout.addView(button);
 
-
-
         }
         else {
-            textQuestion.setText(quizList.get(0).questions.get(questionNumber).question);
-            textQuestion.setWidth(250);
-            textQuestion.setHeight(150);
-            textQuestion.setGravity(Gravity.CENTER);
-            linearLayout.addView(textQuestion);
-
-            for (int i = 0; i < quizList.get(0).questions.get(questionNumber).options.size(); i++) {
-                TextView textView = new TextView(this);
-                textView.setText(quizList.get(0).questions.get(questionNumber).options.get(i).answer);
-                textView.setWidth(250);
-                textView.setHeight(150);
-                textView.setGravity(Gravity.CENTER);
-
-                textView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        questionNumber = questionNumber + 1;
-                        Log.i("questionNumber", questionNumber.toString());
-                        reCreate(view);
-                    }
-                });
-
-                linearLayout.addView(textView);
-            }
-
+            quizSetup();
         }
     }
 }
