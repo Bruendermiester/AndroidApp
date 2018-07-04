@@ -33,7 +33,9 @@ public class MainActivity extends AppCompatActivity {
     private AdView myAdView2;
 
     List<Quiz> quizList = new LinkedList<>();
+    Quiz currentQuiz;
 
+    private int correctAnswers = 0;
     public static Integer questionNumber = 0;
 
     public class Quiz {
@@ -203,33 +205,52 @@ public class MainActivity extends AppCompatActivity {
         return quizList;
     }
 
-
-
     public void quizSetup() {
+        int countId = 0;
         LinearLayout linearLayout = new LinearLayout(this);
         setContentView(linearLayout);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
 
         TextView textQuestion = new TextView(this);
-        textQuestion.setText(quizList.get(0).questions.get(questionNumber).question);
+        textQuestion.setText((questionNumber+1) + ": " + currentQuiz.questions
+                .get(questionNumber).question);
         textQuestion.setWidth(250);
-        textQuestion.setHeight(150);
+        textQuestion.setHeight(250);
         textQuestion.setGravity(Gravity.CENTER);
         linearLayout.addView(textQuestion);
 
-        for( int i = 0; i < quizList.get(0).questions.get(questionNumber).options.size(); i++ )
+        for(int i = 0; i < currentQuiz.questions.get(questionNumber).options.size(); i++ )
         {
             TextView textView = new TextView(this);
-            textView.setText(quizList.get(0).questions.get(questionNumber).options.get(i).answer);
+            textView.setText((i+1) + ": " + currentQuiz.questions
+                    .get(questionNumber).options.get(i).answer);
             textView.setWidth(250);
             textView.setHeight(150);
-            textView.setGravity(Gravity.CENTER);
+            textView.setId(countId);
+            countId ++;
+            textView.setGravity(Gravity.START);
+            textView.setPadding(30,0,0,0);
 
             textView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    questionNumber = questionNumber + 1;
-                    Log.i("questionNumber",  questionNumber.toString());
+                    for(int i = 0; i < currentQuiz.questions.get(questionNumber).options.size(); i++) {
+                        TextView currentView = findViewById(i);
+                        if(currentQuiz.getType().toLowerCase().equals("knowledge") ||
+                                currentQuiz.getType().toLowerCase().equals("screenshot")) {
+                            if (view == currentView && currentQuiz.questions.get(questionNumber).options.get(i).points == 1) {
+                                correctAnswers++;
+                            }
+                        }
+                        else {
+                            if (view == currentView) {
+                                //TODO: Create outcome class and outcome object to store count of each
+                               // currentQuiz.questions.get(questionNumber).options.get(i).personalityMatch;
+                            }
+                        }
+                    }
+
+                    questionNumber++;
                     reCreate(view);
                 }
             });
@@ -238,7 +259,54 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void reCreate(View view) {
 
+        int quizLength = currentQuiz.questions.size();
+
+        // Remove current question views
+        ViewGroup r = (ViewGroup) view.getParent().getParent();
+        r.removeAllViews();
+
+        if(questionNumber.equals(quizLength)) {
+
+            LinearLayout linearLayout = new LinearLayout(this);
+            setContentView(linearLayout);
+            linearLayout.setOrientation(LinearLayout.VERTICAL);
+
+            TextView textView = new TextView(this);
+            textView.setText("Congradulations you wasted your time");
+            textView.setWidth(250);
+            textView.setHeight(350);
+            textView.setGravity(Gravity.CENTER);
+            linearLayout.addView(textView);
+
+            TextView textView2 = new TextView(this);
+            textView2.setText(correctAnswers + " / " + quizLength);
+            textView2.setWidth(250);
+            textView2.setHeight(100);
+            textView2.setGravity(Gravity.CENTER);
+            linearLayout.addView(textView2);
+
+            Button button = new Button(this);
+            button.setText("Start over??");
+            button.setWidth(75);
+            button.setHeight(40);
+            button.setGravity(Gravity.CENTER);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    questionNumber = 0;
+                    correctAnswers = 0;
+                    reCreate(view);
+                }
+            });
+            linearLayout.addView(button);
+
+        }
+        else {
+            quizSetup();
+        }
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -247,6 +315,7 @@ public class MainActivity extends AppCompatActivity {
         MobileAds.initialize(this, "ca-app-pub-3940256099942544/6300978111");
 
         quizList = loadJSonFromAsset();
+        currentQuiz = quizList.get(0);
 
         quizSetup();
 
@@ -260,47 +329,5 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void reCreate(View view) {
 
-        ViewGroup r = (ViewGroup) view.getParent().getParent();
-        r.removeAllViews();
-
-
-
-        if( questionNumber.equals(quizList.get(0).questions.size())) {
-
-            LinearLayout linearLayout = new LinearLayout(this);
-            setContentView(linearLayout);
-            linearLayout.setOrientation(LinearLayout.VERTICAL);
-
-            TextView textQuestion = new TextView(this);
-
-            TextView textView = new TextView(this);
-            textView.setText("Congradulations you wasted your time");
-            textView.setWidth(250);
-            textView.setHeight(350);
-            textView.setGravity(Gravity.CENTER);
-            linearLayout.addView(textView);
-
-
-            Button button = new Button(this);
-
-            button.setText("Start over??");
-            button.setWidth(75);
-            button.setHeight(40);
-            button.setGravity(Gravity.CENTER);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    questionNumber = 0;
-                    reCreate(view);
-                }
-            });
-            linearLayout.addView(button);
-
-        }
-        else {
-            quizSetup();
-        }
-    }
 }
