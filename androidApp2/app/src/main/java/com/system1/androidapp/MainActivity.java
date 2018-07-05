@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.ads.AdRequest;
@@ -34,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
     List<Quiz> quizList = new LinkedList<>();
     Quiz currentQuiz;
+    List<Outcomes> currentOutcomeList = new LinkedList<>();
 
     private int correctAnswers = 0;
     public static Integer questionNumber = 0;
@@ -46,6 +46,15 @@ public class MainActivity extends AppCompatActivity {
         private String url;
 
         public ArrayList<Questions> questions;
+        public ArrayList<Outcomes> outcomes;
+
+        public ArrayList<Outcomes> getOutcomes() {
+            return outcomes;
+        }
+
+        public void setOutcomes(ArrayList<Outcomes> outcomes) {
+            this.outcomes = outcomes;
+        }
 
         public ArrayList<Questions> getQuestions() {
             return questions;
@@ -147,10 +156,63 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public class Outcomes implements Serializable {
+
+        private String description;
+        private String imageId;
+        private String title;
+        private int count;
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public String getImageId() {
+            return imageId;
+        }
+
+        public void setImageId(String imageId) {
+            this.imageId = imageId;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public Outcomes() {
+
+        }
+
+        public Outcomes(Quiz quiz, int index) {
+            count = 0;
+            this.description = quiz.outcomes.get(index).getDescription();
+            this.title = quiz.outcomes.get(index).getTitle();
+            this.imageId = quiz.outcomes.get(index).getImageId();
+        }
+
+    }
+
     public class Options implements Serializable {
 
         private String answer;
         private Integer points;
+        private String personalityMatch;
+
+        public String getPersonalityMatch() {
+            return personalityMatch;
+        }
+
+        public void setPersonalityMatch(String personalityMatch) {
+            this.personalityMatch = personalityMatch;
+        }
 
         public String getAnswer() {
             return answer;
@@ -193,6 +255,7 @@ public class MainActivity extends AppCompatActivity {
                 quiz.setType(quizJson.getType());
                 quiz.setUrl(quizJson.getUrl());
                 quiz.setQuestions(quizJson.getQuestions());
+                quiz.setOutcomes(quizJson.getOutcomes());
                 quizList.add(quiz);
             }
 
@@ -225,7 +288,7 @@ public class MainActivity extends AppCompatActivity {
             textView.setText((i+1) + ": " + currentQuiz.questions
                     .get(questionNumber).options.get(i).answer);
             textView.setWidth(250);
-            textView.setHeight(150);
+            textView.setHeight(100);
             textView.setId(countId);
             countId ++;
             textView.setGravity(Gravity.START);
@@ -235,6 +298,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     for(int i = 0; i < currentQuiz.questions.get(questionNumber).options.size(); i++) {
+
                         TextView currentView = findViewById(i);
                         if(currentQuiz.getType().toLowerCase().equals("knowledge") ||
                                 currentQuiz.getType().toLowerCase().equals("screenshot")) {
@@ -244,7 +308,11 @@ public class MainActivity extends AppCompatActivity {
                         }
                         else {
                             if (view == currentView) {
-                                //TODO: Create outcome class and outcome object to store count of each
+                                for(int x = 0; x < currentOutcomeList.size(); x++) {
+                                    if(currentQuiz.outcomes.get(x).title.equals(currentQuiz.questions.get(questionNumber).options.get(i).personalityMatch)) {
+                                        currentOutcomeList.get(x).count++;
+                                    }
+                                }
                                // currentQuiz.questions.get(questionNumber).options.get(i).personalityMatch;
                             }
                         }
@@ -268,7 +336,69 @@ public class MainActivity extends AppCompatActivity {
         r.removeAllViews();
 
         if(questionNumber.equals(quizLength)) {
+            displayResult(quizLength);
+        }
+        else {
+            quizSetup();
+        }
+    }
 
+    public void displayResult(int quizLength) {
+
+        if(currentQuiz.getType().equals("personality")) {
+
+            LinearLayout linearLayout = new LinearLayout(this);
+            setContentView(linearLayout);
+            linearLayout.setOrientation(LinearLayout.VERTICAL);
+
+            TextView textView = new TextView(this);
+            textView.setText("Congradulations you wasted your time");
+            textView.setWidth(250);
+            textView.setHeight(350);
+            textView.setGravity(Gravity.CENTER);
+            linearLayout.addView(textView);
+
+            TextView textView2 = new TextView(this);
+            textView2.setText(getPersonalityOutcomeResult());
+            textView2.setWidth(250);
+            textView2.setHeight(100);
+            textView2.setGravity(Gravity.CENTER);
+            linearLayout.addView(textView2);
+
+            Button button = new Button(this);
+            button.setText("Start over??");
+            button.setWidth(75);
+            button.setHeight(40);
+            button.setGravity(Gravity.CENTER);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    questionNumber = 0;
+                    correctAnswers = 0;
+                    reCreate(view);
+                }
+            });
+            linearLayout.addView(button);
+
+            Button button2 = new Button(this);
+            button2.setText("Home");
+            button2.setWidth(75);
+            button2.setHeight(40);
+            button2.setGravity(Gravity.CENTER);
+            button2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    questionNumber = 0;
+                    correctAnswers = 0;
+                    ViewGroup r = (ViewGroup) view.getParent().getParent();
+                    r.removeAllViews();
+                    setupHomePage();
+                }
+            });
+            linearLayout.addView(button2);
+
+        }
+        else {
             LinearLayout linearLayout = new LinearLayout(this);
             setContentView(linearLayout);
             linearLayout.setOrientation(LinearLayout.VERTICAL);
@@ -302,10 +432,86 @@ public class MainActivity extends AppCompatActivity {
             });
             linearLayout.addView(button);
 
+            Button button2 = new Button(this);
+            button2.setText("Home");
+            button2.setWidth(75);
+            button2.setHeight(40);
+            button2.setGravity(Gravity.CENTER);
+            button2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    questionNumber = 0;
+                    correctAnswers = 0;
+                    ViewGroup r = (ViewGroup) view.getParent().getParent();
+                    r.removeAllViews();
+                    setupHomePage();
+                }
+            });
+            linearLayout.addView(button2);
         }
-        else {
-            quizSetup();
+
+    }
+
+    public String getPersonalityOutcomeResult() {
+        String result = "";
+        int currentCount = 0;
+
+        for(int i = 0; i < currentOutcomeList.size(); i++) {
+            if(currentCount <= currentOutcomeList.get(i).count) {
+                currentCount = currentOutcomeList.get(i).count;
+                result = currentOutcomeList.get(i).title;
+            }
         }
+
+        return result;
+    }
+
+    public void setupHomePage() {
+
+        int countId = 0;
+        LinearLayout linearLayout = new LinearLayout(this);
+        setContentView(linearLayout);
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+
+        for(int i = 0; i < quizList.size(); i++) {
+            TextView textView = new TextView(this);
+            textView.setText(quizList.get(i).title);
+            textView.setWidth(250);
+            textView.setHeight(200);
+            textView.setId(countId);
+            countId ++;
+            textView.setGravity(Gravity.START);
+            textView.setPadding(30,0,0,0);
+
+            textView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    for(int i = 0; i < quizList.size(); i++) {
+                        TextView currentView = findViewById(i);
+                        if (view == currentView) {
+
+                            currentQuiz = quizList.get(i);
+
+                            // Set up personality outcome object for displaying result
+                            if(currentQuiz.getType().toLowerCase().equals("personality")) {
+                                for(int x = 0; x < currentQuiz.outcomes.size(); x++ ) {
+                                    Outcomes outcome = new Outcomes(currentQuiz, x);
+                                    currentOutcomeList.add(outcome);
+                                }
+                            }
+
+                            quizSetup();
+
+                        }
+                    }
+                }
+            });
+
+            linearLayout.addView(textView);
+
+        }
+
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -315,9 +521,8 @@ public class MainActivity extends AppCompatActivity {
         MobileAds.initialize(this, "ca-app-pub-3940256099942544/6300978111");
 
         quizList = loadJSonFromAsset();
-        currentQuiz = quizList.get(0);
 
-        quizSetup();
+        setupHomePage();
 
 //        myAdView = findViewById(R.id.myAdView);
 //        AdRequest adRequest = new AdRequest.Builder().build();
@@ -328,6 +533,5 @@ public class MainActivity extends AppCompatActivity {
 //        myAdView2.loadAd(adRequest2);
 
     }
-
 
 }
