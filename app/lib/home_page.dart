@@ -1,6 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import './widgets/card_illuvial.dart';
+import 'package:flutter/services.dart';
+import 'dart:convert';
+import 'package:app/iilluvial_modal.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -14,22 +15,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class Illuvial {
-  final String name;
-  final String class_name;
-  final String affinity_name;
-  final Color backgroundColor;
-  final String image;
-
-  Illuvial(
-      {required this.name,
-      required this.class_name,
-      required this.affinity_name,
-      required this.backgroundColor,
-      required this.image});
-}
-
-getIlluvialCards(List<Illuvial> illuvials) {
+getIlluvialCards(List<IlluvialDataModal> illuvials) {
   return illuvials
       .map(
         (item) => Container(
@@ -37,7 +23,7 @@ getIlluvialCards(List<Illuvial> illuvials) {
             padding: const EdgeInsets.all(5.0),
             width: 170,
             decoration: BoxDecoration(
-                color: item.backgroundColor,
+                color: const Color.fromRGBO(190, 80, 79, 1),
                 borderRadius: BorderRadius.circular(20)),
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -58,7 +44,7 @@ getIlluvialCards(List<Illuvial> illuvials) {
                       Container(
                         padding: const EdgeInsets.all(2.0),
                         child: Text(
-                          item.affinity_name,
+                          item.affinityName,
                           textAlign: TextAlign.right,
                           style: const TextStyle(
                               color: Colors.white, fontSize: 12),
@@ -67,7 +53,7 @@ getIlluvialCards(List<Illuvial> illuvials) {
                       Container(
                         padding: const EdgeInsets.all(2.0),
                         child: Text(
-                          item.class_name,
+                          item.className,
                           textAlign: TextAlign.left,
                           style: const TextStyle(
                               color: Colors.white, fontSize: 12),
@@ -82,107 +68,15 @@ getIlluvialCards(List<Illuvial> illuvials) {
       .toList();
 }
 
+Future<List<IlluvialDataModal>> readJson() async {
+  final String response =
+      await rootBundle.loadString('assets/json/illuvials.json');
+  final data = await json.decode(response) as List<dynamic>;
+  return data.map((e) => IlluvialDataModal.fromJson(e)).toList();
+}
+
 class _HomePageState extends State<HomePage> {
   int currentPage = 0;
-
-  List<Illuvial> illuvials = [
-    Illuvial(
-        name: "Scoriox",
-        class_name: 'Arcenite',
-        affinity_name: 'Magma',
-        backgroundColor: const Color.fromRGBO(190, 80, 79, 1),
-        image: 'assets/images/Scoriox.png'),
-    Illuvial(
-        name: "Titanor",
-        class_name: 'Collosusis',
-        affinity_name: 'Granite',
-        backgroundColor: const Color.fromRGBO(162, 120, 184, 1),
-        image: 'assets/images/Titanor.png'),
-    Illuvial(
-        name: "Scoriox",
-        class_name: 'Arcenite',
-        affinity_name: 'Magma',
-        backgroundColor: const Color.fromRGBO(190, 80, 79, 1),
-        image: 'assets/images/Scoriox.png'),
-    Illuvial(
-        name: "Titanor",
-        class_name: 'Collosusis',
-        affinity_name: 'Granite',
-        backgroundColor: const Color.fromRGBO(162, 120, 184, 1),
-        image: 'assets/images/Titanor.png'),
-    Illuvial(
-        name: "Scoriox",
-        class_name: 'Arcenite',
-        affinity_name: 'Magma',
-        backgroundColor: const Color.fromRGBO(190, 80, 79, 1),
-        image: 'assets/images/Scoriox.png'),
-    Illuvial(
-        name: "Titanor",
-        class_name: 'Collosusis',
-        affinity_name: 'Granite',
-        backgroundColor: const Color.fromRGBO(162, 120, 184, 1),
-        image: 'assets/images/Titanor.png'),
-    Illuvial(
-        name: "Scoriox",
-        class_name: 'Arcenite',
-        affinity_name: 'Magma',
-        backgroundColor: const Color.fromRGBO(190, 80, 79, 1),
-        image: 'assets/images/Scoriox.png'),
-    Illuvial(
-        name: "Titanor",
-        class_name: 'Collosusis',
-        affinity_name: 'Granite',
-        backgroundColor: const Color.fromRGBO(162, 120, 184, 1),
-        image: 'assets/images/Titanor.png'),
-    Illuvial(
-        name: "Scoriox",
-        class_name: 'Arcenite',
-        affinity_name: 'Magma',
-        backgroundColor: const Color.fromRGBO(190, 80, 79, 1),
-        image: 'assets/images/Scoriox.png'),
-    Illuvial(
-        name: "Titanor",
-        class_name: 'Collosusis',
-        affinity_name: 'Granite',
-        backgroundColor: const Color.fromRGBO(162, 120, 184, 1),
-        image: 'assets/images/Titanor.png'),
-    Illuvial(
-        name: "Scoriox",
-        class_name: 'Arcenite',
-        affinity_name: 'Magma',
-        backgroundColor: const Color.fromRGBO(190, 80, 79, 1),
-        image: 'assets/images/Scoriox.png'),
-    Illuvial(
-        name: "Titanor",
-        class_name: 'Collosusis',
-        affinity_name: 'Granite',
-        backgroundColor: const Color.fromRGBO(162, 120, 184, 1),
-        image: 'assets/images/Titanor.png'),
-    Illuvial(
-        name: "Scoriox",
-        class_name: 'Arcenite',
-        affinity_name: 'Magma',
-        backgroundColor: const Color.fromRGBO(190, 80, 79, 1),
-        image: 'assets/images/Scoriox.png'),
-    Illuvial(
-        name: "Titanor",
-        class_name: 'Collosusis',
-        affinity_name: 'Granite',
-        backgroundColor: const Color.fromRGBO(162, 120, 184, 1),
-        image: 'assets/images/Titanor.png'),
-    Illuvial(
-        name: "Scoriox",
-        class_name: 'Arcenite',
-        affinity_name: 'Magma',
-        backgroundColor: const Color.fromRGBO(190, 80, 79, 1),
-        image: 'assets/images/Scoriox.png'),
-    Illuvial(
-        name: "Titanor",
-        class_name: 'Collosusis',
-        affinity_name: 'Granite',
-        backgroundColor: const Color.fromRGBO(162, 120, 184, 1),
-        image: 'assets/images/Titanor.png')
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -194,14 +88,27 @@ class _HomePageState extends State<HomePage> {
           child: SingleChildScrollView(
               physics: const ClampingScrollPhysics(),
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 15,
-                ),
-                child: Flexible(
-                  child:
-                      Wrap(spacing: 1, children: getIlluvialCards(illuvials)),
-                ),
-              )),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 15,
+                  ),
+                  child: FutureBuilder(
+                    future: readJson(),
+                    builder: (context, data) {
+                      if (data.hasError) {
+                        return Center(child: Text("${data.error}"));
+                      } else if (data.hasData) {
+                        var items = data.data as List<IlluvialDataModal>;
+                        return Flexible(
+                          child: Wrap(
+                              spacing: 1, children: getIlluvialCards(items)),
+                        );
+                      } else {
+                        return Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                    },
+                  ))),
         ));
   }
 }
