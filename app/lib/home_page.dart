@@ -28,7 +28,8 @@ getIlluvialCards(List<IlluvialDataModal> illuvials) {
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
+                  Flexible(
+                      child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
@@ -60,7 +61,7 @@ getIlluvialCards(List<IlluvialDataModal> illuvials) {
                         ),
                       )
                     ],
-                  ),
+                  )),
                   Container(
                       child: Image.asset(item.image, width: 75, height: 75)),
                 ])),
